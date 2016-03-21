@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Elections Module</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .ridingContainer {
+            margin-top: 50px;
+            width: 30%;
+            float: left;
+            display: none;
+        }
+
+        .ridingName {
+            font-size: 2vw;
+        }
+
+        .candidatesTableContainer {
+            margin-top: 25px;
+            margin-left: 10%;
+            width: 100%;
+        }
+
+        .candidatesTableContainer td {
+            text-align: center;
+        }
+
+        .candidateName {
+            float: left;
+            margin-right: 10%;
+        }
+    </style>
+</head>
+
+<script>
+    function multiplyNode(node, count) {
+        for (var i = 0, copy; i < count - 1; i++) {
+            copy = node.cloneNode(true);
+            node.parentNode.insertBefore(copy, node);
+        }
+    }
+
+    function partyColor(partyCode) {
+        switch (partyCode) {
+            case 'NDP':
+                color = 'orange';
+                break;
+            case 'LIB':
+                color = 'red';
+                break;
+            case 'PC':
+                color = 'blue';
+                break;
+            case 'GRN':
+                color = 'green';
+                break;
+            case 'IND':
+                color = 'grey';
+                break;
+        }
+
+        return color;
+    }
+
+    window.gNews_getRidingDetailsCallback = function(data) {
+        document.addEventListener("DOMContentLoaded", function(event) {
+
+            multiplyNode(document.querySelector('.ridingContainer'), data.length);
+
+            for (var i=0; i<data.length; i++) {
+                ridingContainer = document.getElementsByClassName('ridingContainer')[i];
+                var ridingName = ridingContainer.querySelector('.ridingName');
+                var candidateContainer = ridingContainer.querySelector('.candidatesContainer');
+
+                ridingName.innerHTML = data[i].name;
+
+                multiplyNode(candidateContainer, data[i].results.length);
+
+                var voteTotalsCount = 0;
+
+                for (var k=0; k<data[i].results.length; k++) {
+                    voteTotalsCount = voteTotalsCount + data[i].results[k].votes;
+                }
+
+                for (var j=0; j<data[i].results.length; j++) {
+                    var candidateContainerList = ridingContainer.querySelectorAll('.candidatesContainer');
+
+                    var candidateName = candidateContainerList[j].children[0];
+                    var voteTotals = candidateContainerList[j].children[1];
+                    var votePercentage = candidateContainerList[j].children[2];
+                    var percentage = data[i].results[j].votes/voteTotalsCount* 100;
+
+                    candidateName.innerHTML = data[i].results[j].name;
+                    voteTotals.innerHTML = data[i].results[j].votes;
+                    votePercentage.innerHTML = percentage.toFixed(0) + '%';
+
+                    var color = partyColor(data[i].results[j].partyCode);
+
+                    candidateContainerList[j].style.backgroundColor = color;
+
+                    if (data[i].results[j].isElected) {
+                        candidateContainerList[j].style.fontSize = '1.5vw';
+                        candidateContainerList[j].style.height = '75px';
+
+                    }
+                }
+            }
+
+            //Display initial Riding
+            var riding = document.getElementsByClassName('ridingContainer');
+            var ridingIndex = 0;
+            riding[ridingIndex].style.display = 'inline-block';
+
+            document.getElementById('previousButton').addEventListener('click', function(){
+                riding[ridingIndex].style.display = 'none';
+                ridingIndex--;
+
+                if (ridingIndex < 0) {
+                    ridingIndex = riding.length - 1;
+                    riding[ridingIndex].style.display = 'inline-block';
+                }
+
+                riding[ridingIndex].style.display = 'inline-block';
+            });
+
+            document.getElementById('nextButton').addEventListener('click', function(){
+                riding[ridingIndex].style.display = 'none';
+                ridingIndex++;
+
+                if (ridingIndex >= riding.length) {
+                    ridingIndex = 0;
+                }
+
+                riding[ridingIndex].style.display = 'inline-block';
+            });
+
+        });
+    };
+</script>
+<script type="text/javascript" src="https://static.globalnews.ca/content/test/results-2011.js"></script>
+
+<body>
+
+    <div class="carouselContainer">
+        <div class="buttonContainer">
+            <button id="previousButton"><</button>
+            <button id="nextButton">></button>
+        </div>
+
+        <div class="ridingContainer">
+            <div class="ridingName"></div>
+                <table class="candidatesTableContainer">
+                    <thead>
+                        <th>Candidate Name</th>
+                        <th>Vote Total</th>
+                        <th>Vote Percentage</th>
+                    </thead>
+                    <tbody>
+                        <tr class="candidatesContainer">
+                            <td><div class="candidateName"></div></td>
+                            <td><div class="voteTotals"></div></td>
+                            <td><div class="votePercentage"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+
+    </div>
+</body>
+</html>
