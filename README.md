@@ -1,3 +1,3 @@
 # electionResults
 
-Code is in index.html
+Code is in public/index.html
